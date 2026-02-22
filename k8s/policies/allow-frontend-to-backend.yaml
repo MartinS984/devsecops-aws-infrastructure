@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-to-backend
+  namespace: banking-app
+spec:
+  podSelector:
+    matchLabels:
+      app: backend # Target the Backend
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend # Only allow the Frontend
+    ports:
+    - protocol: TCP
+      port: 3000 # Your Express API port

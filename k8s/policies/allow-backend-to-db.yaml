@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backend-to-db
+  namespace: banking-app
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres # Target the Database
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: backend # Only allow the Backend
+    ports:
+    - protocol: TCP
+      port: 5432 # Standard Postgres Port

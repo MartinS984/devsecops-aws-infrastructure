@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-db
+  namespace: banking-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_DB
+          value: "banking"
+        - name: POSTGRES_USER
+          value: "banking_admin"
+        - name: POSTGRES_PASSWORD
+          value: "securepassword" # In Phase 3, we'll move this to K8s Secrets
+        ports:
+        - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-db
+  namespace: banking-app
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: banking-backend
+  namespace: banking-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      # 1. The 'Gatekeeper' - waits for the DB port to be open
+      initContainers:
+      - name: wait-for-db
+        image: busybox:1.28
+        command: ['sh', '-c', "until nc -zv postgres-db 5432; do echo waiting for db; sleep 2; done"]
+      containers:
+      - name: backend
+        image: banking-backend:local # Replace with your local image build later
+        imagePullPolicy: Never # Crucial for local images
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DATABASE_URL
+          value: "postgres://banking_admin:securepassword@postgres-db:5432/banking"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: banking-app
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: 3000
+    targetPort: 3000
