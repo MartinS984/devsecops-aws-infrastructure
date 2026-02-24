@@ -90,3 +90,54 @@ Verify the Elastic IP and NAT Gateway are gone in the AWS Console.
 Since you are planning to destroy the environment, remember that your `terraform.tfstate` file is now the most important file on your ASUS laptop. If you lose it, you'll have to manually delete the AWS resources via the console.
 
 **Would you like me to show you how to set up an S3 Remote Backend for your Terraform state so you can safe
+
+
+Gemini said
+Those rules are perfectly fine for a default Network ACL.
+
+By default, every AWS VPC comes with a Network ACL that allows all inbound and outbound traffic. What you see in your screenshot—Rule 100 allowing all traffic and the asterisk (*) rule denying everything else—is the standard "Allow All" configuration.
+
+🛡️ Why these rules are safe for your project
+Even though this NACL is "wide open," your banking-cluster-prod remains highly secure because of how we built the other layers:
+
+Security Groups: These are your primary line of defense. Unlike the NACL, your Security Groups are set to deny by default. Traffic only gets to your EKS nodes because we explicitly opened port 443 for your Bastion.
+
+Private Isolation: Since your nodes are in private subnets with no public IP, an "Allow All" NACL doesn't mean the internet can reach them. There is no path from the outside world into those subnets except through the NAT Gateway or your SSM session.
+
+Stateless vs. Stateful: If you tried to "harden" this NACL right now by only allowing port 443, your kubectl commands would actually stop working. NACLs are stateless, so you would also have to manually write rules to allow the "return" traffic on ephemeral ports.
+
+🏆 Portfolio Recap: What you've built
+Since you've just finished the destroy, you now have a complete end-to-end project history for your CV. You successfully navigated:
+
+Identity Management: Fixed the EKS v1alpha1 vs. v1beta1 authentication by manually upgrading the Bastion to AWS CLI v2.
+
+Network Security: Resolved i/o timeout errors by bridging Security Groups.
+
+Connectivity: Engineered a secure tunnel from your ASUS laptop to a private API using AWS SSM port forwarding.
+
+Application Lifecycle: Debugged a CrashLoopBackOff and verified the cluster could handle a multi-replica Node.js deployment.
+
+🚀 Project: Bank-Grade Private EKS Infrastructure
+DevSecOps Engineer | February 2026
+
+Designed and deployed a Zero-Trust, three-tier Node.js application environment on AWS EKS, ensuring total isolation from the public internet.
+
+🛠️ Key Technical Achievements
+Infrastructure as Code (IaC): Architected a complete VPC with 4 subnets (2 Public/2 Private) using Terraform to host a private EKS cluster (v1.29).
+
+Zero-Trust Connectivity: Eliminated SSH/Port 22 exposure by implementing an SSM-only Bastion host for cluster administration.
+
+Advanced Networking: Resolved complex i/o timeout issues by engineering cross-Security Group ingress rules, allowing secure communication between the Bastion and the private API endpoint.
+
+Identity & Access Management (IAM/RBAC): Bridged AWS IAM and Kubernetes RBAC by mapping the bastion-ssm-role to the system:masters group within the aws-auth ConfigMap.
+
+Secure Tunnels: Successfully established SSM Port-Forwarding sessions (Local Port 8443 → Private EKS 443) to enable remote Terraform management of a private-only API.
+
+Container Lifecycle & Debugging: Resolved CrashLoopBackOff scenarios by optimizing Node.js container entry points and verified high availability across t3.medium worker nodes.
+
+💻 Technologies Used
+Cloud: AWS (EKS, VPC, SSM, NAT Gateway, IAM, KMS).
+
+Tools: Terraform, Kubectl, AWS CLI v2, Docker, Node.js.
+
+OS: Ubuntu 22.04 (via WSL2 on Windows 11).
